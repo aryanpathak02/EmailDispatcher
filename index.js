@@ -6,13 +6,11 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({
-  origin: 'https://aryanpathak.netlify.app/'
-}));
+app.use(cors());
 
 // Nodemailer transporter setup
 const transporter = nodemailer.createTransport({
@@ -50,5 +48,5 @@ app.get("*", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}/`);
+  console.log(`Server running`);
 });
