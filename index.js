@@ -12,15 +12,17 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(cors());
 app.use(cors({
-  origin: 'https://aryanpathak.netlify.app/' 
+  origin: 'https://aryanpathak.netlify.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE',],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Nodemailer transporter setup
 const transporter = nodemailer.createTransport({
-  service: 'Gmail', 
+  service: 'Gmail',
   auth: {
-    user: process.env.USER, 
-    pass: process.env.PASSWORD 
+    user: process.env.USER,
+    pass: process.env.PASSWORD
   }
 });
 
@@ -28,12 +30,12 @@ app.post('/send-email', (req, res) => {
   const { name, comment, email } = req.body;
 
   if (Object.keys(req.body).length === 0) {
-    return res.status(400).send({ message: 'Request body is empty'});
+    return res.status(400).send({ message: 'Request body is empty' });
   }
 
   const mailOptions = {
     from: email,
-    to: process.env.SENDEREMAIL, 
+    to: process.env.SENDEREMAIL,
     subject: 'New Submission from Portfolio website',
     text: `You have received a new comment from ${name} (${email}): ${comment}`
   };
