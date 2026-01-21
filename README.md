@@ -213,7 +213,23 @@ Open `test-api.html` in your browser for a simple web interface to test the API.
 
 ## 🚀 Deployment
 
-### Environment Variables for Production
+### Local Development
+```bash
+npm start
+```
+
+### Vercel (Serverless)
+This project is optimized for Vercel deployment. See [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md) for detailed instructions.
+
+**Quick Vercel Deploy:**
+```bash
+npm i -g vercel
+vercel
+```
+
+### Traditional Server Deployment
+
+#### Environment Variables for Production
 
 ```env
 NODE_ENV=production

@@ -1,66 +1,52 @@
 const rateLimit = require('express-rate-limit');
 const HTTP_STATUS = require('../utils/httpStatus');
 
+// Check if running on Vercel
+const isVercel = process.env.VERCEL === '1';
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 /**
  * General rate limiter for all endpoints
  */
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || (isVercel ? 200 : 100), // Higher limit for serverless
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again later.',
     retryAfter: '15 minutes'
   },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  statusCode: HTTP_STATUS.TOO_MANY_REQUESTS || 429,
+  standardHeaders: true,
+  legacyHeaders: false,
+  statusCode: HTTP_STATUS.TOO_MANY_REQUESTS,
+  skip: () => isDevelopment, // Skip in development
 });
 
 /**
- * Strict rate limiter for email sending endpoint
+ * Email rate limiter for contact form
  */
 const emailLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // Limit each IP to 5 email requests per hour
+  windowMs: parseInt(process.env.EMAIL_RATE_LIMIT_WINDOW_MS) || 60 * 60 * 1000, // 1 hour
+  max: parseInt(process.env.EMAIL_RATE_LIMIT_MAX_REQUESTS) || (isVercel ? 10 : 5), // Higher for serverless
   message: {
     success: false,
     message: 'Too many email requests from this IP. Please wait before sending another message.',
     retryAfter: '1 hour',
-    limit: 5,
+    limit: isVercel ? 10 : 5,
     windowMs: '1 hour'
   },
   standardHeaders: true,
   legacyHeaders: false,
-  statusCode: HTTP_STATUS.TOO_MANY_REQUESTS || 429,
-  // Skip successful requests in count (optional)
-  skipSuccessfulRequests: false,
-  // Skip failed requests in count (optional) 
-  skipFailedRequests: false,
+  statusCode: HTTP_STATUS.TOO_MANY_REQUESTS,
+  skip: () => isDevelopment,
 });
 
 /**
- * Very strict rate limiter for repeated failures
- */
-const strictLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000, // 5 minutes
-  max: 3, // Only 3 attempts per 5 minutes
-  message: {
-    success: false,
-    message: 'Too many failed attempts. Please wait 5 minutes before trying again.',
-    retryAfter: '5 minutes'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  statusCode: HTTP_STATUS.TOO_MANY_REQUESTS || 429,
-});
-
-/**
- * Health check rate limiter (more lenient)
+ * Health check rate limiter
  */
 const healthLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 30, // 30 requests per minute for health checks
+  max: isVercel ? 60 : 30, // Higher for serverless monitoring
   message: {
     success: false,
     message: 'Too many health check requests.',
@@ -68,7 +54,25 @@ const healthLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  statusCode: HTTP_STATUS.TOO_MANY_REQUESTS || 429,
+  statusCode: HTTP_STATUS.TOO_MANY_REQUESTS,
+  skip: () => isDevelopment,
+});
+
+/**
+ * Strict rate limiter for repeated failures (future use)
+ */
+const strictLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 3,
+  message: {
+    success: false,
+    message: 'Too many failed attempts. Please wait 5 minutes before trying again.',
+    retryAfter: '5 minutes'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  statusCode: HTTP_STATUS.TOO_MANY_REQUESTS,
+  skip: () => isDevelopment,
 });
 
 module.exports = {

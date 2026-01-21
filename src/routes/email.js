@@ -28,13 +28,23 @@ router.post('/send-email',
   const emailOptions = {
     text: `You have received a new comment from ${name} (${email}): ${comment}`,
     html: `
-      <h3>New Portfolio Contact</h3>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Message:</strong></p>
-      <p>${comment}</p>
-      <hr>
-      <p><small>Sent at: ${new Date().toISOString()}</small></p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+          New Portfolio Contact
+        </h2>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+          <p><strong>Message:</strong></p>
+          <div style="background: white; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;">
+            ${comment}
+          </div>
+        </div>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="color: #666; font-size: 12px;">
+          Sent via Portfolio Contact Form at ${new Date().toLocaleString()}
+        </p>
+      </div>
     `
   };
 
